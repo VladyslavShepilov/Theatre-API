@@ -10,9 +10,12 @@ class Actor(models.Model):
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
 
+    class Meta:
+        unique_together = ("first_name", "last_name")
+
 
 class Genre(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
 
 
 class Play(models.Model):
