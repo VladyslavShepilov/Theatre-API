@@ -13,7 +13,7 @@ from theatre_service.models import (
 class ActorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actor
-        fields = ("id", "first_name", "last_name")
+        fields = ("id", "first_name", "last_name", "full_name")
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -22,21 +22,27 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ("id", "name",)
 
 
+class PlaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Play
+        fields = ("title", "description", "duration", "actors", "genres")
+
+
 class PlayListSerializer(serializers.ModelSerializer):
     actors = serializers.SlugRelatedField(
-        slug_field="actors__full_name",
+        slug_field="full_name",
         many=True,
         read_only=True
     )
     genres = serializers.SlugRelatedField(
-        slug_field="genres__name",
+        slug_field="name",
         many=True,
         read_only=True
     )
 
     class Meta:
         model = Play
-        fields = ("title", "description", "actors", "genres")
+        fields = ("title", "description", "duration", "actors", "genres")
 
 
 class PlayDetailSerializer(serializers.ModelSerializer):
@@ -45,4 +51,4 @@ class PlayDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Play
-        fields = ("title", "description", "actors", "genres")
+        fields = ("title", "description", "duration", "actors", "genres")
