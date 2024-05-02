@@ -64,4 +64,4 @@ class TheatreHallSerializer(serializers.ModelSerializer):
 class TheatreHallListSerializer(serializers.ModelSerializer):
     class Meta:
         model = TheatreHall
-        fields = ("name", "capacity")
+        fields = ("id", "name", "capacity")
