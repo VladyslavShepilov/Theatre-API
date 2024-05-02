@@ -13,16 +13,26 @@ class Actor(models.Model):
     class Meta:
         unique_together = ("first_name", "last_name")
 
+    def __str__(self):
+        return f"{self.full_name}"
+
 
 class Genre(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
+    def __str__(self):
+        return f"{self.name}"
+
 
 class Play(models.Model):
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    actors = models.ManyToManyField(Actor)
-    genres = models.ManyToManyField(Genre)
+    title = models.CharField(max_length=255, unique=True)
+    description = models.TextField(max_length=1000)
+    duration = models.IntegerField(blank=True, null=True)
+    actors = models.ManyToManyField(Actor, related_name="plays")
+    genres = models.ManyToManyField(Genre, related_name="plays")
+
+    def __str__(self):
+        return f"{self.title}"
 
 
 class TheatreHall(models.Model):
