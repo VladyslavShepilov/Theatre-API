@@ -7,11 +7,12 @@ class Actor(models.Model):
     last_name = models.CharField(max_length=255)
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         return f"{self.first_name} {self.last_name}"
 
     class Meta:
         unique_together = ("first_name", "last_name")
+        ordering = ["last_name"]
 
     def __str__(self):
         return f"{self.full_name}"
@@ -36,9 +37,13 @@ class Play(models.Model):
 
 
 class TheatreHall(models.Model):
-    name = models.CharField(max_length=255)
-    seats_in_row = models.IntegerField()
-    rows = models.IntegerField()
+    name = models.CharField(max_length=255, unique=True)
+    seats_in_row = models.PositiveIntegerField()
+    rows = models.PositiveIntegerField()
+
+    @property
+    def capacity(self) -> int:
+        return self.seats_in_row * self.rows
 
 
 class Performance(models.Model):
