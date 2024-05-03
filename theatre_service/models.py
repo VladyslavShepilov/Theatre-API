@@ -45,11 +45,21 @@ class TheatreHall(models.Model):
     def capacity(self) -> int:
         return self.seats_in_row * self.rows
 
+    def __str__(self):
+        return f"{self.name}"
+
 
 class Performance(models.Model):
     play = models.ForeignKey(Play, on_delete=models.CASCADE)
     theatre_hall = models.ForeignKey(TheatreHall, on_delete=models.CASCADE)
     show_time = models.DateTimeField()
+
+    class Meta:
+        ordering = ["-show_time"]
+        unique_together = ("play", "show_time", "theatre_hall")
+
+    def __str__(self):
+        return f"{self.play.title} at {str(self.show_time)}"
 
 
 class Ticket(models.Model):
