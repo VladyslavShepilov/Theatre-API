@@ -1,4 +1,7 @@
+from django.db import transaction
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 from theatre_service.models import (
     Actor,
     Genre,
@@ -98,3 +101,67 @@ class PerformanceDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Performance
         fields = ("id", "play", "theatre_hall", "show_time")
+
+
+class TicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ("row", "seat", "performance")
+
+    def validate(self, attrs):
+        data = super(TicketSerializer, self).validate(attrs=attrs)
+        Ticket.validate_tickets(
+            row=attrs["row"],
+            seat=attrs["seat"],
+            theatre_hall=attrs["performance"].theatre_hall,
+            error_to_raise=ValidationError
+        )
+        return data
+
+
+class TicketListSerializer(serializers.ModelSerializer):
+    performance = serializers.SlugRelatedField(slug_field="play__title", read_only=True)
+
+    class Meta:
+        model = Ticket
+        fields = ("row", "seat", "performance")
+
+
+class TicketDetailSerializer(serializers.Serializer):
+    performance = PerformanceListSerializer(read_only=True, many=False)
+
+    class Meta:
+        model = Ticket
+        fields = ("seat", "row", "performance")
+
+
+class ReservationSerializer(serializers.ModelSerializer):
+    tickets = TicketSerializer(many=True, read_only=False, allow_null=False)
+
+    class Meta:
+        model = Reservation
+        fields = ("id", "tickets", "user")
+
+    def create(self, validated_data):
+        tickets_data = validated_data.pop("tickets")
+        with transaction.atomic():
+            reservation = Reservation.objects.create(**validated_data)
+            for ticket_data in tickets_data:
+                Ticket.objects.create(reservation=reservation, **ticket_data)
+            return reservation
+
+
+class ReservationListSerializer(serializers.ModelSerializer):
+    tickets = TicketListSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Reservation
+        fields = ("id", "tickets")
+
+
+class ReservationDetailSerializer(serializers.ModelSerializer):
+    tickets = TicketDetailSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Reservation
+        fields = ("id", "tickets")

@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -59,15 +60,52 @@ class Performance(models.Model):
         unique_together = ("play", "show_time", "theatre_hall")
 
     def __str__(self):
-        return f"{self.play.title} at {str(self.show_time)}"
-
-
-class Ticket(models.Model):
-    row = models.IntegerField()
-    seat = models.IntegerField()
-    performance = models.ForeignKey(Performance, on_delete=models.CASCADE)
+        return f"{self.play.title} at {self.show_time.strftime('%Y-%m-%d %H:%M')}"
 
 
 class Reservation(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Ticket(models.Model):
+    row = models.IntegerField()
+    seat = models.IntegerField()
+    performance = models.ForeignKey(
+        Performance,
+        on_delete=models.CASCADE,
+        related_name="tickets"
+    )
+    reservation = models.ForeignKey(
+        Reservation,
+        on_delete=models.CASCADE,
+        related_name="tickets"
+    )
+
+    class Meta:
+        ordering = ["reservation"]
+        unique_together = ("row", "seat", "performance")
+
+    @staticmethod
+    def validate_tickets(row, seat, theatre_hall, error_to_raise):
+        for ticket_attr_value, ticket_attr_name, theatre_hall_attr_name in [
+                (row, "row", "rows",),
+                (seat, "seat", "seats_in_row")
+        ]:
+            theatre_hall_attr_value = getattr(theatre_hall, theatre_hall_attr_name)
+            if not (1 <= ticket_attr_value <= theatre_hall_attr_value):
+                raise error_to_raise(
+                    f"{ticket_attr_name} with value {ticket_attr_name}"
+                    f"must be in range from 1 to {theatre_hall_attr_value}"
+                )
+
+    def clean(self):
+        Ticket.validate_tickets(
+            self.row,
+            self.seat,
+            self.performance.theatre_hall,
+            ValidationError
+        )
+
+    def __str__(self):
+        return f"{self.row} {self.seat}"
