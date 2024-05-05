@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models import F, Count
+from django.db.models import F, Count, Q
 from django.shortcuts import render
 from rest_framework import viewsets, mixins
 
@@ -32,15 +32,38 @@ class ActorViewSet(viewsets.ModelViewSet):
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        word = self.request.query_params.get("actors")
+        if word:
+            queryset = queryset.filter(
+                Q(first_name__icontains=word)
+                & Q(last_name__icontains=word))
+        return queryset
+
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        title = self.request.query_params.get("genre")
+        if title:
+            queryset = queryset.filter(name__icontains=title)
+        return queryset
+
 
 class PlayViewSet(viewsets.ModelViewSet):
     queryset = Play.objects.prefetch_related("actors", "genres")
     serializer_class = PlaySerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+        title = self.request.query_params.get("title")
+        if title:
+            queryset = queryset.filter(title__icontains=title)
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "list":
