@@ -1,8 +1,7 @@
 from datetime import datetime
 
 from django.db.models import F, Count, Q
-from django.shortcuts import render
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, generics
 
 from theatre_service.models import (
     Actor,
