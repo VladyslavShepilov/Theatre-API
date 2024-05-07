@@ -129,5 +129,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "theatre.pagination_classes.DefaultPagination",
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
     ]
 }

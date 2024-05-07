@@ -8,7 +8,6 @@ urlpatterns = [
     path("register/", CreateUserView.as_view(), name="create"),
     path("login/", CreateTokenView.as_view(), name="token"),
     path(
-        "api/",
-        include("theatre_service.urls", namespace="theatre-api")
+        "api/", include("theatre_service.urls", namespace="theatre-api")
     ),
 ]
