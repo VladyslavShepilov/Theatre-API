@@ -1,6 +1,9 @@
+import os
+import uuid
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.text import slugify
 
 
 class Actor(models.Model):
@@ -26,8 +29,16 @@ class Genre(models.Model):
         return f"{self.name}"
 
 
+def play_image_file_path(instance, filename):
+    _, extension = os.path.splitext(filename)
+    filename = f"{slugify(instance.title)}-{uuid.uuid4()}{extension}"
+
+    return os.path.join("uploads/plays/", filename)
+
+
 class Play(models.Model):
     title = models.CharField(max_length=255, unique=True)
+    image = models.ImageField(null=True, upload_to=play_image_file_path)
     description = models.TextField(max_length=1000)
     duration = models.IntegerField(blank=True, null=True)
     actors = models.ManyToManyField(Actor, related_name="plays")
