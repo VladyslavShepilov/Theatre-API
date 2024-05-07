@@ -141,7 +141,7 @@ class ReservationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
-        fields = ("id", "tickets", "user")
+        fields = ("id", "tickets", "created_at")
 
     def create(self, validated_data):
         tickets_data = validated_data.pop("tickets")
