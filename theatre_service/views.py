@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.db.models import F, Count, Q
 from rest_framework import viewsets, mixins, generics
+from rest_framework.permissions import IsAuthenticated
 
 from theatre_service.models import (
     Actor,
@@ -142,6 +143,7 @@ class PerformanceViewSet(viewsets.ModelViewSet):
 class ReservationViewSet(viewsets.ModelViewSet):
     queryset = Reservation.objects.prefetch_related("tickets__performance", "tickets__reservation")
     serializer_class = ReservationSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.action == "list":
