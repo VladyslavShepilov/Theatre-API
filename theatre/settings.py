@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from datetime import timedelta
 from pathlib import Path
-
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,6 +30,10 @@ DEBUG = os.getenv("DEBUG", True)
 
 ALLOWED_HOSTS = []
 
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+
 
 # Application definition
 
@@ -40,7 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "rest_framework.authtoken",
+    "rest_framework_simplejwt",
     "theatre_service",
 ]
 
@@ -150,7 +155,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
 }
