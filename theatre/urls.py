@@ -8,14 +8,15 @@ from rest_framework_simplejwt.views import (
 )
 
 from theatre import settings
-from theatre.views import ManageUserView
+from theatre.views import ManageUserView, CreateUserView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("register/", CreateUserView.as_view(), name="create"),
+    path("me/", ManageUserView.as_view(), name="manage"),
     path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
-    path("me/", ManageUserView.as_view(), name="manage"),
     path(
         "api/", include("theatre_service.urls", namespace="theatre-api")
     ),
