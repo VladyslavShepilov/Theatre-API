@@ -1,5 +1,5 @@
 services:
-  cinema:
+  theatre:
     build:
       context: .
     env_file:
@@ -23,7 +23,7 @@ services:
     env_file:
       - .env
     ports:
-      - "5432:5432"
+      - "5431:5431"
     volumes:
       - my_db:$PGDATA
 
