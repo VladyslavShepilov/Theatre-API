@@ -20,4 +20,4 @@ router.register("theatre_halls", TheatreHallViewSet)
 router.register("performances", PerformanceViewSet)
 router.register("reservation", ReservationViewSet)
 
-urlpatterns = [path("", include(router.urls))]
+urlpatterns = router.urls
