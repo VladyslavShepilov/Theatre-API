@@ -2,7 +2,7 @@ FROM python:3.12.2-alpine
 
 ENV PYTHOUNBUFFERED 1
 
-WORKDIR app/
+WORKDIR /app
 
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
@@ -18,6 +18,5 @@ RUN adduser \
 
 RUN chown -R my_user /files/media
 RUN chmod -R 755 /files/media
-
 
 USER my_user
