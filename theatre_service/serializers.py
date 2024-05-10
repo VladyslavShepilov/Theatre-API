@@ -128,7 +128,7 @@ class TicketSerializer(serializers.ModelSerializer):
 
 
 class TicketListSerializer(serializers.ModelSerializer):
-    performance = serializers.SlugRelatedField(slug_field="play__title", read_only=True)
+    performance = serializers.SlugRelatedField(slug_field="title", source="performance.play", read_only=True)
 
     class Meta:
         model = Ticket
