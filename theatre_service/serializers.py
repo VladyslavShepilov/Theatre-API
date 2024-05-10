@@ -45,7 +45,7 @@ class PlayListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Play
-        fields = ("title", "description", "duration", "actors", "genres", "image")
+        fields = ("id", "title", "description", "duration", "actors", "genres", "image")
 
 
 class PlayDetailSerializer(serializers.ModelSerializer):
@@ -144,7 +144,7 @@ class TicketDetailSerializer(serializers.Serializer):
 
 
 class ReservationSerializer(serializers.ModelSerializer):
-    tickets = TicketSerializer(many=True, read_only=False, allow_null=False)
+    tickets = TicketSerializer(many=True, read_only=False, allow_empty=False)
 
     class Meta:
         model = Reservation
