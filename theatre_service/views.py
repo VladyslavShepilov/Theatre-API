@@ -161,7 +161,7 @@ class PerformanceViewSet(viewsets.ModelViewSet):
 
 
 class ReservationViewSet(viewsets.ModelViewSet):
-    queryset = Reservation.objects.prefetch_related("tickets__performance", "tickets__reservation")
+    queryset = Reservation.objects.prefetch_related("tickets__performance__play", "tickets__reservation")
     serializer_class = ReservationSerializer
     permission_classes = (IsAuthenticated,)
 
