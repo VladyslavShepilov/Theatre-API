@@ -47,4 +47,12 @@ Installs requirements and runs django server.
 
 
 ## Demo
-![Website Interface](demo.png)
+![Performance List](Demo_Images/performances_ls.png)
+
+![Reservation List](Demo_Images/reservations_ls.png)
+
+![Filtering feature on multiple pages](Demo_Images/halls_filter.png)
+
+![Different info, depending on request type](Demo_Images/halls_det.png)
+
+![Image uploading endpoint](Demo_Images/upload-image.png)
