@@ -13,7 +13,6 @@ from theatre_service.models import (
     Play,
     TheatreHall,
     Performance,
-    Ticket,
     Reservation,
 )
 from theatre_service.serializers import (
