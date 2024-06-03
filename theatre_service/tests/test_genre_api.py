@@ -12,14 +12,13 @@ GENRE_URL = reverse("theatre-api:genre-list")
 
 
 def create_user(**kwargs):
-    return get_user_model().objects.create(**kwargs)
+    return get_user_model().objects.create_user(**kwargs)
 
 
-def sample_genres(**params):
+def sample_genre(**params):
     defaults = {"name": "Comedy"}
     defaults.update(params)
-
-    return Genre.objects.create(**params)
+    return Genre.objects.create(**defaults)
 
 
 class PublicGenresApiTests(TestCase):
@@ -34,15 +33,15 @@ class PublicGenresApiTests(TestCase):
 class PrivateGenreApiTests(TestCase):
     def setUp(self):
         self.user = create_user(
-            username="test_admin",
-            email="test@test.com",
+            username="test_user",
+            email="user@test.com",
             password="testpass",
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
     def test_list_genres(self):
-        sample_genres()
+        sample_genre()
 
         response = self.client.get(GENRE_URL)
 
@@ -63,7 +62,7 @@ class AdminGenreApiTests(TestCase):
     def setUp(self):
         self.user = create_user(
             username="test_admin",
-            email="test@test.com",
+            email="admin@test.com",
             password="testpass",
             is_staff=True,
         )
@@ -75,23 +74,36 @@ class AdminGenreApiTests(TestCase):
 
         response = self.client.post(GENRE_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Genre.objects.count(), 1)
+        genre = Genre.objects.get(id=response.data["id"])
+        self.assertEqual(genre.name, payload["name"])
 
     def test_retrieve_genre(self):
-        sample_genres()
+        genre = sample_genre()
 
-        response = self.client.get(f"{GENRE_URL}/1")
+        url = reverse("theatre-api:genre-detail", args=[genre.id])
+        response = self.client.get(url)
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        serializer = GenreSerializer(genre)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
 
     def test_put_genre(self):
-        sample_genres()
+        genre = sample_genre()
 
-        response = self.client.put(f"{GENRE_URL}/1", {})
+        payload = {"name": "Updated Name"}
+        url = reverse("theatre-api:genre-detail", args=[genre.id])
+        response = self.client.put(url, payload)
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        genre.refresh_from_db()
+        self.assertEqual(genre.name, payload["name"])
 
     def test_delete_genre(self):
-        sample_genres()
+        genre = sample_genre()
 
-        response = self.client.delete(f"{GENRE_URL}/1")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        url = reverse("theatre-api:genre-detail", args=[genre.id])
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Genre.objects.count(), 0)
