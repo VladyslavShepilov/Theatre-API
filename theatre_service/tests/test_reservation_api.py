@@ -70,7 +70,10 @@ class PrivateReservationApiTests(TestCase):
         reservation = sample_reservation(user=self.user)
         sample_ticket(reservation)
 
-        response = self.client.get(reverse("theatre-api:reservation-detail", args=[reservation.id]))
+        response = self.client.get(
+            reverse("theatre-api:reservation-detail",
+                    args=[reservation.id])
+        )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -78,14 +81,20 @@ class PrivateReservationApiTests(TestCase):
         reservation = sample_reservation(user=self.user)
         sample_ticket(reservation)
 
-        response = self.client.put(reverse("theatre-api:reservation-detail", args=[reservation.id]))
+        response = self.client.put(
+            reverse("theatre-api:reservation-detail",
+                    args=[reservation.id])
+        )
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_delete_reservation(self):
         reservation = sample_reservation(user=self.user)
         sample_ticket(reservation)
 
-        response = self.client.delete(reverse("theatre-api:reservation-detail", args=[reservation.id]))
+        response = self.client.delete(
+            reverse("theatre-api:reservation-detail",
+                    args=[reservation.id])
+        )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 

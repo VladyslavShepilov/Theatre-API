@@ -45,7 +45,10 @@ class PlayListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Play
-        fields = ("id", "title", "description", "duration", "actors", "genres", "image")
+        fields = (
+            "id", "title", "description",
+            "duration", "actors", "genres", "image",
+        )
 
 
 class PlayDetailSerializer(serializers.ModelSerializer):
@@ -54,7 +57,10 @@ class PlayDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Play
-        fields = ("title", "description", "duration", "actors", "genres", "image")
+        fields = (
+            "title", "description", "duration",
+            "actors", "genres", "image",
+        )
 
 
 class PlayImageSerializer(serializers.ModelSerializer):
@@ -99,7 +105,10 @@ class PerformanceListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Performance
-        fields = ("id", "play", "theatre_hall", "show_time", "tickets_available", "play_image")
+        fields = (
+            "id", "play", "theatre_hall", "show_time",
+            "tickets_available", "play_image"
+        )
 
 
 class PerformanceDetailSerializer(serializers.ModelSerializer):
@@ -128,7 +137,10 @@ class TicketSerializer(serializers.ModelSerializer):
 
 
 class TicketListSerializer(serializers.ModelSerializer):
-    performance = serializers.SlugRelatedField(slug_field="title", source="performance.play", read_only=True)
+    performance = serializers.SlugRelatedField(
+        slug_field="title", source="performance.play",
+        read_only=True
+    )
 
     class Meta:
         model = Ticket

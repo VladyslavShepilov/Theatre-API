@@ -144,7 +144,9 @@ class PlayImageUploadTests(TestCase):
             img.save(ntf, format="JPEG")
             ntf.seek(0)
             self.client.post(upload_url, {"image": ntf}, format="multipart")
-        performance_detail = performance_detail_url(performance_id=self.performance.pk)
+        performance_detail = performance_detail_url(
+            performance_id=self.performance.pk
+        )
         res = self.client.get(performance_detail)
 
         self.assertIn("image", res.data["play"])

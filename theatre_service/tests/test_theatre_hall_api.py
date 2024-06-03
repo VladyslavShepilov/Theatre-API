@@ -6,7 +6,9 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 from theatre_service.models import TheatreHall
-from theatre_service.serializers import TheatreHallSerializer, TheatreHallListSerializer
+from theatre_service.serializers import (
+    TheatreHallSerializer, TheatreHallListSerializer
+)
 
 
 def create_user(**kwargs):

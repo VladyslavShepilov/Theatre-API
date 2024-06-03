@@ -106,7 +106,9 @@ class Ticket(models.Model):
                 (row, "row", "rows",),
                 (seat, "seat", "seats_in_row")
         ]:
-            theatre_hall_attr_value = getattr(theatre_hall, theatre_hall_attr_name)
+            theatre_hall_attr_value = getattr(
+                theatre_hall, theatre_hall_attr_name
+            )
             if not (1 <= ticket_attr_value <= theatre_hall_attr_value):
                 raise error_to_raise(
                     f"{ticket_attr_name} with value {ticket_attr_name}"

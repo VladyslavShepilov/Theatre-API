@@ -27,7 +27,10 @@ from theatre_service.serializers import (
     PerformanceSerializer,
     PerformanceListSerializer,
     PerformanceDetailSerializer,
-    ReservationSerializer, ReservationListSerializer, ReservationDetailSerializer, PlayImageSerializer,
+    ReservationSerializer,
+    ReservationListSerializer,
+    ReservationDetailSerializer,
+    PlayImageSerializer,
 )
 
 
@@ -179,7 +182,10 @@ class PerformanceViewSet(viewsets.ModelViewSet):
 
 
 class ReservationViewSet(viewsets.ModelViewSet):
-    queryset = Reservation.objects.prefetch_related("tickets__performance__play", "tickets__reservation")
+    queryset = Reservation.objects.prefetch_related(
+        "tickets__performance__play",
+        "tickets__reservation"
+    )
     serializer_class = ReservationSerializer
     permission_classes = (IsAuthenticated,)
 
