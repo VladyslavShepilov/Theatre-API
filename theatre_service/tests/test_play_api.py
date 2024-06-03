@@ -23,7 +23,6 @@ def sample_play(**params) -> Play:
         "duration": 90,
     }
     defaults.update(params)
-
     return Play.objects.create(**defaults)
 
 
@@ -32,14 +31,12 @@ def sample_genre(**params):
         "name": "Drama",
     }
     defaults.update(params)
-
     return Genre.objects.create(**defaults)
 
 
 def sample_actor(**params):
     defaults = {"first_name": "George", "last_name": "Clooney"}
     defaults.update(params)
-
     return Actor.objects.create(**defaults)
 
 
@@ -54,12 +51,11 @@ def sample_performance(**params):
         "theatre_hall": theatre_hall,
     }
     defaults.update(params)
-
     return Performance.objects.create(**defaults)
 
 
 def image_upload_url(play_id):
-    """Return URL for recipe image upload"""
+    """Return URL for play image upload"""
     return reverse("theatre-api:play-upload-image", args=[play_id])
 
 
@@ -68,7 +64,7 @@ def detail_url(play_id):
 
 
 def performance_detail_url(performance_id):
-    return reverse("theatre-api:play-upload-image", args=[performance_id])
+    return reverse("theatre-api:performance-detail", args=[performance_id])
 
 
 class PlayImageUploadTests(TestCase):
@@ -119,8 +115,8 @@ class PlayImageUploadTests(TestCase):
                     "title": "Title",
                     "description": "Description",
                     "duration": 90,
-                    "genres": [1],
-                    "actors": [1],
+                    "genres": [self.genre.id],
+                    "actors": [self.actor.id],
                     "image": ntf,
                 },
                 format="multipart",
@@ -151,6 +147,8 @@ class PlayImageUploadTests(TestCase):
         performance_detail = performance_detail_url(performance_id=self.performance.pk)
         res = self.client.get(performance_detail)
 
+        self.assertIn("image", res.data["play"])
+
 
 class PlayTestUnauthorizedUser(APITestCase):
     def setUp(self):
@@ -167,7 +165,7 @@ class PlayTestAuthorizedUser(APITestCase):
             username="admin", email="admin@example.com", password="admin,"
         )
         self.genre = sample_genre()
-        self.genre1 = sample_genre(name="comedy")
+        self.genre1 = sample_genre(name="Comedy")
 
         self.actor = sample_actor()
         self.actor1 = sample_actor(first_name="Denis", last_name="Petrov")
@@ -179,7 +177,7 @@ class PlayTestAuthorizedUser(APITestCase):
         self.play.genres.add(self.genre)
 
         self.play2 = sample_play(
-            title="Test_play",
+            title="Test play",
             description="Test play written to test API",
             duration=125,
         )
@@ -188,12 +186,12 @@ class PlayTestAuthorizedUser(APITestCase):
 
         self.performance = sample_performance(play=self.play)
 
-    def authorized_access_list(self):
+    def test_authorized_access_list(self):
         response = self.client.get(PLAY_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def authorized_access_detail(self):
-        response = self.user.get(detail_url(self.play.pk))
+    def test_authorized_access_detail(self):
+        response = self.client.get(detail_url(self.play.pk))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_filtering_genres_actors_id_title_str(self):
@@ -205,25 +203,22 @@ class PlayTestAuthorizedUser(APITestCase):
                 "genres": self.genre.pk,
             }
         )
-        """ Both query params"""
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 4)
+        self.assertEqual(len(response.data["results"]), 1)
 
-        """Actors with 2 overlaps """
         response = self.client.get(
             PLAY_URL,
             data={"actors": self.actor.pk}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 4)
+        self.assertEqual(len(response.data["results"]), 2)
 
-        """Genres with 1 overlap"""
         response = self.client.get(
             PLAY_URL,
             data={"genres": self.genre1.pk}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 4)
+        self.assertEqual(len(response.data["results"]), 1)
 
     def test_list_play_post(self):
         payload = {
@@ -243,14 +238,14 @@ class PlayTestAuthorizedUser(APITestCase):
 
     def test_list_play(self):
         response = self.client.get(PLAY_URL)
-        self.assertEqual(len(response.data), 4)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 2)
 
     def test_retrieve_play(self):
-        play = Play.objects.create(title="Test play post", duration=120)
+        play = sample_play(title="Test play post", duration=120)
         url = detail_url(play_id=play.pk)
         response = self.client.get(url)
         serializer = PlayDetailSerializer(play)
 
-        self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
