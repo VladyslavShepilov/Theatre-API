@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db.models import F, Count, Q
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import IsAdminUser
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -191,6 +192,9 @@ class ReservationViewSet(viewsets.ModelViewSet):
         elif self.action == "retrieve":
             return ReservationDetailSerializer
         return ReservationSerializer
+
+    def update(self, request, *args, **kwargs):
+        raise MethodNotAllowed(request.method)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
