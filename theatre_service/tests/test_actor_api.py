@@ -12,7 +12,7 @@ ACTOR_URL = reverse("theatre-api:actor-list")
 
 
 def create_user(**kwargs):
-    return get_user_model().objects.create(**kwargs)
+    return get_user_model().objects.create_user(**kwargs)
 
 
 def sample_actor(**params):
@@ -21,7 +21,6 @@ def sample_actor(**params):
         "last_name": "test_last",
     }
     defaults.update(params)
-
     return Actor.objects.create(**defaults)
 
 
@@ -37,8 +36,8 @@ class PublicActorApiTests(TestCase):
 class PrivateActorApiTests(TestCase):
     def setUp(self):
         self.user = create_user(
-            username="test_admin",
-            email="test@test.com",
+            username="test_user",
+            email="user@test.com",
             password="testpass",
         )
         self.client = APIClient()
@@ -46,12 +45,9 @@ class PrivateActorApiTests(TestCase):
 
     def test_get_actors(self):
         sample_actor()
-
         response = self.client.get(ACTOR_URL)
-
         actors = Actor.objects.all()
         serializer = ActorSerializer(actors, many=True)
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["results"], serializer.data)
 
@@ -60,7 +56,6 @@ class PrivateActorApiTests(TestCase):
             "first_name": "test_name",
             "last_name": "test_last",
         }
-
         response = self.client.post(ACTOR_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -69,7 +64,7 @@ class AdminActorApiTests(TestCase):
     def setUp(self):
         self.user = create_user(
             username="test_admin",
-            email="test@test.com",
+            email="admin@test.com",
             password="testpass",
             is_staff=True,
         )
@@ -81,25 +76,37 @@ class AdminActorApiTests(TestCase):
             "first_name": "test_name",
             "last_name": "test_last",
         }
-
         response = self.client.post(ACTOR_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Actor.objects.count(), 1)
+        actor = Actor.objects.get(id=response.data["id"])
+        for key in payload.keys():
+            self.assertEqual(payload[key], getattr(actor, key))
 
     def test_retrieve_actor(self):
-        sample_actor()
-
-        response = self.client.get(f"{ACTOR_URL}/1/")
-
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        actor = sample_actor()
+        url = reverse("theatre-api:actor-detail", args=[actor.id])
+        response = self.client.get(url)
+        serializer = ActorSerializer(actor)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
 
     def test_put_actor(self):
-        sample_actor()
-
-        response = self.client.put(f"{ACTOR_URL}/1/", {})
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        actor = sample_actor()
+        payload = {
+            "first_name": "updated_name",
+            "last_name": "updated_last",
+        }
+        url = reverse("theatre-api:actor-detail", args=[actor.id])
+        response = self.client.put(url, payload)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        actor.refresh_from_db()
+        for key in payload.keys():
+            self.assertEqual(payload[key], getattr(actor, key))
 
     def test_delete_actor(self):
-        sample_actor()
-
-        response = self.client.delete(f"{ACTOR_URL}/1/")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        actor = sample_actor()
+        url = reverse("theatre-api:actor-detail", args=[actor.id])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Actor.objects.count(), 0)
